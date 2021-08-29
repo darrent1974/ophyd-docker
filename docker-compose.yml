@@ -1,0 +1,51 @@
+version: "3"
+services:
+  epics:
+    image: nsls2/epics-docker:latest
+    environment:
+      - EPICS_CA_AUTO_ADDR_LIST="no"
+      - EPICS_CA_MAX_ARRAY_BYTES=10000000
+      - EPICS_CA_ADDR_LIST=172.19.255.255
+    volumes:
+      - ./ophyd_AD_test:/tmp/ophyd_AD_test/
+    tty: true
+  area-detector:
+    image: prjemian/synapps-6.1-ad-3.7:latest
+    environment: 
+      - EPICS_CA_AUTO_ADDR_LIST="no"
+      - EPICS_CA_MAX_ARRAY_BYTES=10000000
+      - EPICS_CA_ADDR_LIST=172.19.255.255
+      - AD_PREFIX="ADSIM:"
+    volumes:
+      - ./ophyd_AD_test:/tmp/ophyd_AD_test/
+    command: bash -c "iocSimDetector/simDetector.sh start && tail -f /dev/null"
+    tty: true
+  pyepics:
+    image: nsls2/pyepics-docker:latest
+    environment:
+      - EPICS_CA_AUTO_ADDR_LIST="no"
+      - EPICS_CA_MAX_ARRAY_BYTES=10000000
+      - EPICS_CA_ADDR_LIST=172.19.255.255
+    tty: true
+  #simioc:
+  #  image: klauer/simioc-docker:pyepics-docker
+  #  environment:
+  #    - EPICS_CA_AUTO_ADDR_LIST="no"
+  #    - EPICS_CA_MAX_ARRAY_BYTES=10000000
+  #    - EPICS_CA_ADDR_LIST=172.19.255.255
+  #  tty: true
+  ophyd-test:
+    build: ./ophyd-test
+    environment:
+      - EPICS_CA_AUTO_ADDR_LIST="no"
+      - EPICS_CA_MAX_ARRAY_BYTES=10000000
+      - EPICS_CA_ADDR_LIST=172.19.255.255
+    ports:
+      - "8888:8888"
+    command: /scripts/startup.sh
+    volumes:
+      - ./ophyd_AD_test:/tmp/ophyd_AD_test/
+      - ./ophyd-test/notebooks:/opt/notebooks
+      - ./ophyd-test/scripts:/scripts
+      - ./ophyd:/ophyd
+    tty: true

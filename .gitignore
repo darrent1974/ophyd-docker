@@ -1,0 +1,4 @@
+.vscode/
+.pytest_cache/
+ophyd/
+ophyd_AD_test/
