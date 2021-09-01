@@ -1,4 +1,4 @@
 .vscode/
 .pytest_cache/
-ophyd/
+.ipynb_checkpoints/
 ophyd_AD_test/
