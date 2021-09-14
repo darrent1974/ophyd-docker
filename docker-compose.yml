@@ -1,28 +1,36 @@
 version: "3"
 services:
-  epics:
-    image: nsls2/epics-docker:latest
+  #epics:
+  #  image: nsls2/epics-docker:latest
+  #  volumes:
+  #    - ./ophyd_AD_test:/tmp/ophyd_AD_test/
+  #  tty: true
+  #pyepics:
+  #  image: nsls2/pyepics-docker:latest
+  #  tty: true
+  #zookeeper:
+  #  image: wurstmeister/zookeeper:latest
+  #  ports:
+  #    - 2181:2181    
+  #  tty: true
+  #kafka:
+  #  image: wurstmeister/kafka:latest
+  #  depends_on:
+  #    - zookeeper    
+  #  environment: 
+  #    HOSTNAME_COMMAND: "route -n | awk '/UG[ \t]/{print $$2}'"
+  #    KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  #  ports:
+  #    - 9092:9092      
+  #  tty: true
+  ophyd-bluesky:
+    image:  dpi/ophyd-bluesky:latest
+    build:
+      context: .
     volumes:
-      - ./ophyd_AD_test:/tmp/ophyd_AD_test/
-    tty: true
-  area-detector:
-    image: prjemian/synapps-6.1-ad-3.7:latest
-    environment: 
-      - AD_PREFIX="ADSIM:"
-    volumes:
-      - ./ophyd_AD_test:/tmp/ophyd_AD_test/
-    command: bash -c "iocSimDetector/simDetector.sh start && tail -f /dev/null"
-    tty: true
-  pyepics:
-    image: nsls2/pyepics-docker:latest
-    tty: true
-  ophyd:
-    build: ./ophyd
-    ports:
-      - "8888:8888"
-    command: /scripts/startup.sh
-    volumes:
-      - ./ophyd_AD_test:/tmp/ophyd_AD_test/
-      - ./ophyd/notebooks:/opt/notebooks
-      - ./ophyd/scripts:/scripts
+      # Uncomment the next line to use Docker from inside the container. See https://aka.ms/vscode-remote/samples/docker-from-docker-compose for details.    
+      - /var/run/docker.sock:/var/run/docker.sock 
+      - ../notebooks:/notebooks
+      - ../scripts:/scripts
+      - ../test:/test
     tty: true

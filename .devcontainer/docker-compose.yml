@@ -1,0 +1,18 @@
+version: "3"
+services:
+  ophyd-bluesky:
+    image:  dpi/area-detector-zmq:latest
+    volumes:
+      # Uncomment the next line to use Docker from inside the container. See https://aka.ms/vscode-remote/samples/docker-from-docker-compose for details.    
+      - /var/run/docker.sock:/var/run/docker.sock 
+      - ../notebooks:/notebooks
+      - ../scripts:/scripts
+      - ../test:/test
+
+    cap_add:
+       - SYS_PTRACE
+    security_opt:
+       - seccomp:unconfined   
+
+    # Overrides default command so things don't shut down after the process ends.
+    command: /bin/sh -c "while sleep 1000; do :; done"

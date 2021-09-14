@@ -23,6 +23,7 @@ from ophyd.areadetector.plugins import (ImagePlugin, StatsPlugin,
                                         OverlayPlugin, ROIPlugin,
                                         TransformPlugin, NetCDFPlugin,
                                         TIFFPlugin, JPEGPlugin, HDF5Plugin,
+                                        KafkaPlugin
                                         # FilePlugin
                                         )
 from ophyd.areadetector.base import NDDerivedSignal
@@ -40,7 +41,7 @@ import uuid
 
 def get_ad_prefix():
     # prefixes = ['13SIM1:', 'XF:31IDA-BI{Cam:Tbl}']
-    prefix = 'ADSIM:'
+    prefix = '13SIM1:'
     test_pv = prefix + 'TIFF1:PluginType_RBV'
     try:
         sig = EpicsSignalRO(test_pv)
@@ -54,9 +55,6 @@ def get_ad_prefix():
         sig.destroy()
 
 try:
-    print(os.getenv('EPICS_CA_ADDR_LIST'))
-    print(os.getenv('EPICS_CA_AUTO_ADDR_LIST'))
-
     os.environ["EPICS_CA_ADDR_LIST"] = ''
     os.environ["EPICS_CA_AUTO_ADDR_LIST"] = ''
 
@@ -64,18 +62,23 @@ try:
     #set_cl('pyepics')
     ad_prefix = get_ad_prefix()
 
-    #print(caget('XF:31IDA-OP{Tbl-Ax:X1}Mtr'))
-
     class MyDetector(SingleTrigger, SimDetector):
-        tiff1 = Cpt(TIFFPlugin, 'TIFF1:')
+        image1 = Cpt(ImagePlugin, ImagePlugin._default_suffix)
+        #kafka1 = Cpt(KafkaPlugin, KafkaPlugin._default_suffix)
 
     det = MyDetector(ad_prefix, name='test')
-    print(det.tiff1.plugin_type)
+    #kafka_plugin = det.kafka1
 
+    print(det.image1.plugin_type)
+    #print(kafka_plugin.plugin_type)
+    #print(kafka_plugin.port_name.get())
+    
     det.wait_for_connection()
 
-    det.cam.acquire_time.put(0.5)
-    det.cam.acquire_period.put(0.5)
+    #kafka_plugin.kafka_broker_address.put('localhost:1234')
+
+    det.cam.acquire_time.put(0.01)
+    det.cam.acquire_period.put(0.01)
     det.cam.num_images.put(1)
     det.cam.image_mode.put(det.cam.ImageMode.SINGLE)
     det.stage()
